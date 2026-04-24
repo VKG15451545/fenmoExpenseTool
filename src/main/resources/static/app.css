@@ -47,6 +47,7 @@ input, select {
   color: var(--text);
   outline: none;
 }
+.mt-8 {margin-top : 8px;}
 input:focus, select:focus { border-color: rgba(91,140,255,0.6); box-shadow: 0 0 0 3px rgba(91,140,255,0.18); }
 .error { display: block; margin-top: 6px; color: #ffb4b4; }
 

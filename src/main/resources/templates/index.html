@@ -31,11 +31,21 @@
 					<small class="error" th:if="${#fields.hasErrors('date')}" th:errors="*{date}">Date error</small>
 				</label>
 
-				<label>
-					<span>Category</span>
-					<input type="text" maxlength="64" th:field="*{category}" placeholder="Food, Travel, Rent" required/>
-					<small class="error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">Category error</small>
-				</label>
+                <label>
+                    <span>Category</span>
+                    <input type="hidden" th:field="*{category}" id="categoryValue"/>
+                    <select id="categorySelect" aria-label="Category">
+                        <option value="Food">Food</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Others">Others</option>
+                        <option value="MoneyTransfer">Money transfer</option>
+                        <option value="Loan">Loan</option>
+                        <option value="__custom__">Custom…</option>
+                    </select>
+                    <input type="text" maxlength="64" id="categoryCustom" class="mt-8" placeholder="Enter custom category"/>
+                    <small class="error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">Category error</small>
+                </label>
 
 				<label class="span-2">
 					<span>Description</span>
@@ -112,6 +122,58 @@
       btn.textContent = 'Adding…';
     });
   })();
+
+    // Category: built-in options + custom.
+  (function () {
+    const hidden = document.getElementById('categoryValue');
+    const select = document.getElementById('categorySelect');
+    const custom = document.getElementById('categoryCustom');
+    if (!hidden || !select || !custom) return;
+    const builtIns = new Map([
+      ['Food', 'Food'],
+      ['Entertainment', 'Entertainment'],
+      ['Transport', 'Transport'],
+      ['Others', 'Others'],
+      ['MoneyTransfer', 'MoneyTransfer'],
+      ['Loan', 'Loan'],
+    ]);
+    function normalize(s) { return (s || '').trim(); }
+    function applyFromHidden() {
+      const v = normalize(hidden.value);
+      if (builtIns.has(v)) {
+        select.value = v;
+        custom.value = '';
+        custom.style.display = 'none';
+      } else if (v) {
+        select.value = '__custom__';
+        custom.value = v;
+        custom.style.display = '';
+      } else {
+        select.value = 'Food';
+        hidden.value = 'Food';
+        custom.value = '';
+        custom.style.display = 'none';
+      }
+    }
+    function syncToHidden() {
+      if (select.value === '__custom__') {
+        const v = normalize(custom.value);
+        hidden.value = v;
+        custom.required = true;
+      } else {
+        hidden.value = select.value;
+        custom.required = false;
+        custom.value = '';
+      }
+      custom.style.display = (select.value === '__custom__') ? '' : 'none';
+    }
+    select.addEventListener('change', syncToHidden);
+    custom.addEventListener('input', syncToHidden);
+    // Initialize on load (also works when server re-renders with validation errors).
+    applyFromHidden();
+    syncToHidden();
+  })();
+
 </script>
 </body>
 </html>
